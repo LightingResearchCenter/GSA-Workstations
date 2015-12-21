@@ -27,7 +27,8 @@ for iLoc = 1:nLoc
     light = data.light{iLoc};
     masks = data.masks{iLoc};
     holidayMask = isHoliday(absTime);
-    mask = ~masks.observation | holidayMask; % TRUE = remove, FALSE = keep
+    weekendMask = isWeekend(absTime);
+    mask = ~masks.observation | holidayMask | weekendMask; % TRUE = remove, FALSE = keep
     
     [~,result.ariMean_allLux(iLoc,:)] = hourlySummary(absTime,light.illuminance,mask,@mean);
     [~,result.geoMean_allLux(iLoc,:)] = hourlySummary(absTime,light.illuminance,mask,@geomean);
