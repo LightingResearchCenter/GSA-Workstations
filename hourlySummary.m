@@ -20,7 +20,9 @@ dataSummary = NaN(1,nHour);
 for iHour = 1:nHour
     thisHour = hourArray(iHour);
     idx = hourOfDay == thisHour;
-    dataSummary(iHour) = functionHandle(dataArray(idx));
+    if ~isempty(dataArray(idx))
+        dataSummary(iHour) = functionHandle(dataArray(idx));
+    end
 end
 
 end
