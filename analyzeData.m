@@ -25,18 +25,17 @@ result = table(data.building,data.session,data.locationID,data.deviceSN,...
 for iLoc = 1:nLoc
     absTime = data.absTime{iLoc};
     light = data.light{iLoc};
+    masks = data.masks{iLoc};
     building = data.building{iLoc};
     session = data.session{iLoc};
     
-    masks = data.masks{iLoc};
-    holidayMask = isHoliday(absTime);
-    weekendMask = isWeekend(absTime);
-    exceptionMask = isException(absTime,building,session);
-    mask = ~masks.observation | holidayMask | weekendMask | exceptionMask; % TRUE = remove, FALSE = keep
+    % TRUE = remove, FALSE = keep
+    baseMask = makeBaseMask(masks, absTime, building, session);
     
-    [~,result.ariMean_allLux(iLoc,:)] = hourlySummary(absTime,light.illuminance,mask,@mean);
-    [~,result.geoMean_allLux(iLoc,:)] = hourlySummary(absTime,light.illuminance,mask,@geomean);
-    [~,result.ariMean_allCs(iLoc,:)]  = hourlySummary(absTime,light.cs,mask,@mean);
+    % All data summary
+    [~,result.ariMean_allLux(iLoc,:)] = hourlySummary(absTime,light.illuminance,baseMask,@mean);
+    [~,result.geoMean_allLux(iLoc,:)] = hourlySummary(absTime,light.illuminance,baseMask,@geomean);
+    [~,result.ariMean_allCs(iLoc,:)]  = hourlySummary(absTime,light.cs,baseMask,@mean);
     
     [result.desk{iLoc}, result.windowProx{iLoc}, result.daylightExposure{iLoc},...
         result.orientation{iLoc}, result.wing{iLoc}, result.floor{iLoc}, result.type{iLoc}] = ...
