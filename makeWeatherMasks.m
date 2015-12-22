@@ -6,11 +6,11 @@ function [sunnyMask,cloudyMask] = makeWeatherMasks(baseMask, absTime, weatherLog
 sunny  = isSunny(absTime, weatherLog); % True = sunny
 cloudy = isCloudy(absTime,weatherLog); % True = cloudy
 noWeather = ~(sunny | cloudy);
-noWeather = noWeather(~baseMask);
+noWeather2 = noWeather(~baseMask);
 
-if any(noWeather)
+if any(noWeather2)
     dates = absTime.localDateNum(~baseMask);
-    noWeatherDates = dates(noWeather);
+    noWeatherDates = dates(noWeather2);
     unqNoWeatherDates = unique(floor(noWeatherDates));
     warning('Weather log missing for some records.');
     display(building);
@@ -18,8 +18,8 @@ if any(noWeather)
     display(datestr(unqNoWeatherDates));
 end
 
-sunnyMask  = ~sunny  | baseMask;
-cloudyMask = ~cloudy | baseMask;
+sunnyMask  = ~sunny  | baseMask | noWeather;
+cloudyMask = ~cloudy | baseMask | noWeather;
 
 end
 
