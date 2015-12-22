@@ -46,7 +46,7 @@ for iLoc = 1:nLoc
     
     % TRUE = remove, FALSE = keep
     baseMask = makeBaseMask(masks, absTime, building, session);
-    [sunnyMask,cloudyMask] = makeWeatherMasks(baseMask, absTime, thisWeatherLog);
+    [sunnyMask,cloudyMask] = makeWeatherMasks(baseMask, absTime, thisWeatherLog, building, session);
     
     % All data summary
     result.ariMean_allLux(iLoc,:) = hourlySummary(absTime,light.illuminance,baseMask,@mean,h_i,h_f);
