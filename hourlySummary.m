@@ -1,4 +1,4 @@
-function dataSummary = hourlySummary(absTime,dataArray,maskArray,functionHandle)
+function dataSummary = hourlySummary(absTime,dataArray,maskArray,functionHandle,h_i,h_f)
 %HOURLYSUMMARY Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -10,7 +10,7 @@ hourOfDay(maskArray) = [];
 dataArray(maskArray) = [];
 
 % Find unique hours
-hourArray = (0:23)';
+hourArray = (h_i:h_f-1)';
 
 % Preallocate variables
 nHour = numel(hourArray);

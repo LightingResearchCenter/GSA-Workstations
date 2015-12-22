@@ -5,6 +5,9 @@ function analyzeData
 csThreshold = 0.005;
 luxThreshold = 0.005;
 
+h_i = 8;
+h_f = 5 + 12;
+
 [githubPath,~,~] = fileparts(pwd);
 circadianPath = fullfile(githubPath,'circadian');
 addpath(circadianPath);
@@ -21,7 +24,7 @@ varNames = {'building','session','locationID','deviceSN',...
     'ariMean_allLux','geoMean_allLux','ariMean_allCs',...
     'ariMean_sunnyLux','geoMean_sunnyLux','ariMean_sunnyCs',...
     'ariMean_cloudyLux','geoMean_cloudyLux','ariMean_cloudyCs'};
-a = NaN(nLoc,24);
+a = NaN(nLoc,h_f-h_i);
 b = cell(nLoc,1);
 result = table(data.building,data.session,data.locationID,data.deviceSN,...
     b,b,b,b,b,b,b,...
@@ -46,19 +49,19 @@ for iLoc = 1:nLoc
     [sunnyMask,cloudyMask] = makeWeatherMasks(baseMask, absTime, thisWeatherLog);
     
     % All data summary
-    result.ariMean_allLux(iLoc,:) = hourlySummary(absTime,light.illuminance,baseMask,@mean);
-    result.geoMean_allLux(iLoc,:) = hourlySummary(absTime,light.illuminance,baseMask,@geomean);
-    result.ariMean_allCs(iLoc,:)  = hourlySummary(absTime,light.cs,baseMask,@mean);
+    result.ariMean_allLux(iLoc,:) = hourlySummary(absTime,light.illuminance,baseMask,@mean,h_i,h_f);
+    result.geoMean_allLux(iLoc,:) = hourlySummary(absTime,light.illuminance,baseMask,@geomean,h_i,h_f);
+    result.ariMean_allCs(iLoc,:)  = hourlySummary(absTime,light.cs,baseMask,@mean,h_i,h_f);
     
     % Sunny data summary
-    result.ariMean_sunnyLux(iLoc,:) = hourlySummary(absTime,light.illuminance,sunnyMask,@mean);
-    result.geoMean_sunnyLux(iLoc,:) = hourlySummary(absTime,light.illuminance,sunnyMask,@geomean);
-    result.ariMean_sunnyCs(iLoc,:)  = hourlySummary(absTime,light.cs,sunnyMask,@mean);
+    result.ariMean_sunnyLux(iLoc,:) = hourlySummary(absTime,light.illuminance,sunnyMask,@mean,h_i,h_f);
+    result.geoMean_sunnyLux(iLoc,:) = hourlySummary(absTime,light.illuminance,sunnyMask,@geomean,h_i,h_f);
+    result.ariMean_sunnyCs(iLoc,:)  = hourlySummary(absTime,light.cs,sunnyMask,@mean,h_i,h_f);
     
     % Cloudy data summary
-    result.ariMean_cloudyLux(iLoc,:) = hourlySummary(absTime,light.illuminance,cloudyMask,@mean);
-    result.geoMean_cloudyLux(iLoc,:) = hourlySummary(absTime,light.illuminance,cloudyMask,@geomean);
-    result.ariMean_cloudyCs(iLoc,:)  = hourlySummary(absTime,light.cs,cloudyMask,@mean);
+    result.ariMean_cloudyLux(iLoc,:) = hourlySummary(absTime,light.illuminance,cloudyMask,@mean,h_i,h_f);
+    result.geoMean_cloudyLux(iLoc,:) = hourlySummary(absTime,light.illuminance,cloudyMask,@geomean,h_i,h_f);
+    result.ariMean_cloudyCs(iLoc,:)  = hourlySummary(absTime,light.cs,cloudyMask,@mean,h_i,h_f);
     
     [result.desk{iLoc}, result.windowProx{iLoc}, result.daylightExposure{iLoc},...
         result.orientation{iLoc}, result.wing{iLoc}, result.floor{iLoc}, result.type{iLoc}] = ...
