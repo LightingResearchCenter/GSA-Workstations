@@ -2,6 +2,9 @@ function analyzeData
 %ANALYZEDATA Summary of this function goes here
 %   Detailed explanation goes here
 
+csThreshold = 0.005;
+luxThreshold = 0.005;
+
 [githubPath,~,~] = fileparts(pwd);
 circadianPath = fullfile(githubPath,'circadian');
 addpath(circadianPath);
@@ -33,6 +36,10 @@ for iLoc = 1:nLoc
     session = data.session{iLoc};
     logID = data.logID(iLoc);
     thisWeatherLog = weatherLog(weatherLog.logID==logID,:);
+    
+    % Apply threshold to CS and illuminance
+    light.cs(light.cs < csThreshold) = csThreshold;
+    light.illuminance(light.illuminance < luxThreshold) = luxThreshold;
     
     % TRUE = remove, FALSE = keep
     baseMask = makeBaseMask(masks, absTime, building, session);
