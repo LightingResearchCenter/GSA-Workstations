@@ -6,9 +6,13 @@ function [sunnyMask,cloudyMask] = makeWeatherMasks(baseMask, absTime, weatherLog
 sunny  = isSunny(absTime, weatherLog); % True = sunny
 cloudy = isCloudy(absTime,weatherLog); % True = cloudy
 noWeather = ~(sunny | cloudy);
+noWeather = noWeather(~baseMask);
 
-if any(noWeather(baseMask))
-%    warning('Weather log missing for some records.');
+if any(noWeather)
+    dates = absTime.localDateNum(~baseMask);
+    noWeatherDates = dates(noWeather);
+    warning('Weather log missing for some records.');
+    display(datestr(noWeatherDates));
 end
 
 sunnyMask  = ~sunny  | baseMask;
