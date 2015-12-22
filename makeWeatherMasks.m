@@ -8,7 +8,7 @@ cloudy = isCloudy(absTime,weatherLog); % True = cloudy
 noWeather = ~(sunny | cloudy);
 
 if any(noWeather(baseMask))
-    warning('Weather log missing for some records.');
+%    warning('Weather log missing for some records.');
 end
 
 sunnyMask  = ~sunny  | baseMask;
