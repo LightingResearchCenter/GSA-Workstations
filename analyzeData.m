@@ -25,10 +25,14 @@ result = table(data.building,data.session,data.locationID,data.deviceSN,...
 for iLoc = 1:nLoc
     absTime = data.absTime{iLoc};
     light = data.light{iLoc};
+    building = data.building{iLoc};
+    session = data.session{iLoc};
+    
     masks = data.masks{iLoc};
     holidayMask = isHoliday(absTime);
     weekendMask = isWeekend(absTime);
-    mask = ~masks.observation | holidayMask | weekendMask; % TRUE = remove, FALSE = keep
+    exceptionMask = isException(absTime,building,session);
+    mask = ~masks.observation | holidayMask | weekendMask | exceptionMask; % TRUE = remove, FALSE = keep
     
     [~,result.ariMean_allLux(iLoc,:)] = hourlySummary(absTime,light.illuminance,mask,@mean);
     [~,result.geoMean_allLux(iLoc,:)] = hourlySummary(absTime,light.illuminance,mask,@geomean);
