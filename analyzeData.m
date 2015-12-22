@@ -9,6 +9,7 @@ addpath(circadianPath);
 % Load preprocessed data from file
 temp = load('data.mat');
 data = temp.data;
+weatherLog = temp.weatherLog;
 
 % Preallocate variables
 nLoc = numel(data.locationID);
@@ -28,9 +29,12 @@ for iLoc = 1:nLoc
     masks = data.masks{iLoc};
     building = data.building{iLoc};
     session = data.session{iLoc};
+    logID = data.logID{iLoc};
+    thisWeatherLog = weatherLog(weatherLog.logID==logID,:);
     
     % TRUE = remove, FALSE = keep
     baseMask = makeBaseMask(masks, absTime, building, session);
+    [sunnyMask,cloudyMask] = makeWeatherMasks(baseMask, absTime, thisWeatherLog);
     
     % All data summary
     [~,result.ariMean_allLux(iLoc,:)] = hourlySummary(absTime,light.illuminance,baseMask,@mean);
