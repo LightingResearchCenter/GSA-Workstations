@@ -5,6 +5,8 @@ function exportResult
 temp = load('result.mat','result');
 result = temp.result;
 
+result.deviceSN = cellfun(@num2str,num2cell(result.deviceSN),'UniformOutput',false);
+
 timestamp = datestr(now,'yyyy-mm-dd_HHMM');
 filePath = ['GSA hourly summary ',timestamp,'.xlsx'];
 
@@ -32,6 +34,7 @@ for iSheet = 1:nSheet
     thisCell = [[metaData.Properties.VariableNames,hourLabels];table2cell(thisTable)];
     
     xlswrite(filePath,thisCell,sheetNames{iSheet});
+%     writetable(thisTable,filePath,'Sheet',sheetNames{iSheet});
 end
 
 winopen(filePath);

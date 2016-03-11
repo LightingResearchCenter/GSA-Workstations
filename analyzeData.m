@@ -16,11 +16,12 @@ addpath(circadianPath);
 temp = load('data.mat');
 data = temp.data;
 weatherLog = temp.weatherLog;
+locationIndex = readtable('locationIndex.xlsx');
 
 % Preallocate variables
 nLoc = numel(data.locationID);
 varNames = {'building','session','locationID','deviceSN',...
-    'desk','windowProx','daylightExposure','orientation','wing','floor','type',...
+    'desk','windowProx','daylightExposure','orientation','wing','floor','height',...
     'ariMean_allLux','geoMean_allLux','ariMean_allCs',...
     'ariMean_sunnyLux','geoMean_sunnyLux','ariMean_sunnyCs',...
     'ariMean_cloudyLux','geoMean_cloudyLux','ariMean_cloudyCs'};
@@ -37,8 +38,21 @@ for iLoc = 1:nLoc
     masks = data.masks{iLoc};
     building = data.building{iLoc};
     session = data.session{iLoc};
+    deviceSN = data.deviceSN(iLoc);
     logID = data.logID(iLoc);
     thisWeatherLog = weatherLog(weatherLog.logID==logID,:);
+    
+    % Check that entry exists in location index
+    bIdx = strcmp(building,locationIndex.building);
+    sIdx = strcmp(session,locationIndex.session);
+    dIdx = deviceSN == locationIndex.deviceSN;
+    lIdx = bIdx & sIdx & dIdx;
+    
+    if ~any(lIdx)
+        continue;
+    else
+        thisLoc = locationIndex(lIdx,:);
+    end
     
     % Apply threshold to CS and illuminance
     light.cs(light.cs < csThreshold) = csThreshold;
@@ -63,17 +77,22 @@ for iLoc = 1:nLoc
     result.geoMean_cloudyLux(iLoc,:) = hourlySummary(absTime,light.illuminance,cloudyMask,@geomean,h_i,h_f);
     result.ariMean_cloudyCs(iLoc,:)  = hourlySummary(absTime,light.cs,cloudyMask,@mean,h_i,h_f);
     
-    [result.desk{iLoc}, result.windowProx{iLoc}, result.daylightExposure{iLoc},...
-        result.orientation{iLoc}, result.wing{iLoc}, result.floor{iLoc}, result.type{iLoc}] = ...
-        decomposeLocationID(data.locationID{iLoc});
+    result.desk{iLoc} = thisLoc.desk{1};
+    result.windowProx{iLoc} = thisLoc.windowProx{1};
+    result.daylightExposure{iLoc} = thisLoc.daylightExposure{1};
+    result.orientation{iLoc} = thisLoc.orientation{1};
+    result.wing{iLoc} = thisLoc.wing{1};
+    result.floor{iLoc} = thisLoc.floor{1};
+    result.height{iLoc} = thisLoc.height{1};
 end
 
-% Find and remove window data
-windowIdx = strcmpi(result.type,'window');
-result(windowIdx,:) = [];
+% Find and remove excluded data
+exIdx = cellfun(@isempty,result.height);
+excludedResult = result(exIdx,:);
+result(exIdx,:) = [];
 
 % Save analysis results
-save('result.mat','result');
+save('result.mat','result','excludedResult');
 
 end
 

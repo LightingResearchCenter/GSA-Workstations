@@ -17,7 +17,15 @@ for iDir = 1:nDir
     thisLogID = dirPaths.logID(iDir);
     
     thisListing = dir(fullfile(thisDirPath,'*.cdf'));
+    if isempty(thisListing) % If no CDFs found look for Excel files
+        thisListing = dir(fullfile(thisDirPath,'*Cropped.xlsx'));
+        if isempty(thisListing) % If no Excel files found return error
+            error('Data files not detected');
+        end
+    end
+    
     tempPath{iDir} = fullfile(thisDirPath,{thisListing.name}');
+    
     tempBuilding{iDir} = repmat({thisBuilding},size(tempPath{iDir}));
     tempSession{iDir} = repmat({thisSession},size(tempPath{iDir}));
     tempLogID{iDir} = repmat(thisLogID,size(tempPath{iDir}));

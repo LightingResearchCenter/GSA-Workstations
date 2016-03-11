@@ -21,10 +21,17 @@ varNames = {'logID','date','condition'};
 for iLog = 1:nLog
     thisLogPath = dirPaths.log{iLog};
     thisLog = readtable(thisLogPath);
-    idxEmpty = cellfun(@isempty,thisLog{:,2});
-    thisLog(idxEmpty,:) = [];
-    tempDate{iLog} = thisLog{:,1} + datenumOffset;
-    tempCondition{iLog} = thisLog{:,2};
+    if ~isempty(thisLog)
+        idxEmpty = cellfun(@isempty,thisLog{:,2});
+        thisLog(idxEmpty,:) = [];
+        
+        if ~iscell(thisLog{:,1})
+            tempDate{iLog} = thisLog{:,1} + datenumOffset;
+        else
+            tempDate{iLog} = datenum(thisLog{:,1});
+        end
+        tempCondition{iLog} = thisLog{:,2};
+    end
 end
 weatherLog = table(tempLogID,tempDate,tempCondition,'VariableNames',varNames);
 
@@ -38,16 +45,29 @@ light       = template;
 activity    = template;
 masks       = template;
 locationID  = template;
-deviceSN    = template;
+deviceSN    = NaN(size(dataPaths.path));
 
-% Read CDFs
+% Read data
 for iPath = 1:nPath
     thisPath = dataPaths.path{iPath};
+    [~,~,thisExt] = fileparts(thisPath);
+    if strcmpi(thisExt,'.cdf') % Import and convert CDF
+        cdfData = daysimeter12.readcdf(thisPath);
+        [absTime{iPath}, relTime{iPath}, epoch{iPath}, ...
+            light{iPath}, activity{iPath}, masks{iPath}, ...
+            locationID{iPath}, tempDevice] = daysimeter12.convertcdf(cdfData);
+    elseif strcmpi(thisExt,'.xlsx') || strcmpi(thisExt,'.xls') % Import and convert Excel
+        rawTable = readtable(thisPath);
+        [absTime{iPath}, relTime{iPath}, epoch{iPath}, light{iPath}, ...
+            activity{iPath}, masks{iPath}, locationID{iPath}, tempDevice] = convertSeattle(rawTable,thisPath);
+    else
+        error('Unrecognized file extension.');
+    end
     
-    cdfData = daysimeter12.readcdf(thisPath);
-    [absTime{iPath}, relTime{iPath}, epoch{iPath}, ...
-        light{iPath}, activity{iPath}, masks{iPath}, ...
-        locationID{iPath}, deviceSN{iPath}] = daysimeter12.convertcdf(cdfData);
+    if numel(tempDevice) > 3
+        tempDevice = tempDevice(3:end);
+    end
+    deviceSN(iPath) = str2double(tempDevice);
 end
 
 
